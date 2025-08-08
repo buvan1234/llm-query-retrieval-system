@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackRx 6.0 Intelligence Query System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        input[type="url"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .answer-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .answer-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .question {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .answer {
+            padding: 25px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .error {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 10px;
+            padding: 20px;
+            color: #c53030;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success-stats {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 10px;
+            padding: 15px;
+            color: #2f855a;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .example-questions {
+            background: #e6f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #0066cc;
+        }
+
+        .example-questions h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+
+        .example-questions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .example-questions li {
+            padding: 8px 0;
+            color: #004d99;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .example-questions li:hover {
+            color: #0066cc;
+            font-weight: 500;
+        }
+
+        .example-questions li::before {
+            content: "• ";
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 HackRx 6.0</h1>
+            <p>Ultra-Fast Intelligence Query System</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="documentUrl">📄 Document URL:</label>
+                    <input 
+                        type="url" 
+                        id="documentUrl" 
+                        placeholder="Enter the document URL..."
+                        value="https://hackrx.blob.core.windows.net/assets/policy.pdf?sv=2023-01-03&st=2025-07-04T09%3A11%3A24Z&se=2027-07-05T09%3A11%3A00Z&sr=b&sp=r&sig=N4a9OU0w0QXO6AOIBiu4bpl7AXvEZogeT%2FjUHNO7HzQ%3D"
+                    />
+                </div>
+
+                <div class="example-questions">
+                    <h3>📝 Example Questions (Click to add):</h3>
+                    <ul>
+                        <li onclick="addQuestion('What is the grace period for premium payment under the National Parivar Mediclaim Plus Policy?')">What is the grace period for premium payment?</li>
+                        <li onclick="addQuestion('What is the waiting period for pre-existing diseases (PED) to be covered?')">What is the waiting period for pre-existing diseases?</li>
+                        <li onclick="addQuestion('Does this policy cover maternity expenses, and what are the conditions?')">Does this policy cover maternity expenses?</li>
+                        <li onclick="addQuestion('What is the waiting period for cataract surgery?')">What is the waiting period for cataract surgery?</li>
+                        <li onclick="addQuestion('Are the medical expenses for an organ donor covered under this policy?')">Are organ donor expenses covered?</li>
+                    </ul>
+                </div>
+                
+                <div class="form-group">
+                    <label for="questions">❓ Questions (one per line):</label>
+                    <textarea 
+                        id="questions" 
+                        placeholder="Enter your questions here, one per line...&#10;&#10;Example:&#10;What is the grace period for premium payment?&#10;What is the waiting period for pre-existing diseases?&#10;Does this policy cover maternity expenses?"
+                    ></textarea>
+                </div>
+                
+                <button class="btn" onclick="processQuery()" id="submitBtn">
+                    <span>🔍</span>
+                    Process Questions
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your questions... This may take a few moments.</p>
+            </div>
+            
+            <div class="error" id="error"></div>
+            
+            <div class="results" id="results">
+                <div class="success-stats" id="stats"></div>
+                <h2>📋 Results:</h2>
+                <div id="answersContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-fill example questions
+        const exampleQuestions = [
+            "What is the grace period for premium payment under the National Parivar Mediclaim Plus Policy?",
+            "What is the waiting period for pre-existing diseases (PED) to be covered?",
+            "Does this policy cover maternity expenses, and what are the conditions?",
+            "What is the waiting period for cataract surgery?",
+            "Are the medical expenses for an organ donor covered under this policy?",
+            "What is the No Claim Discount (NCD) offered in this policy?",
+            "Is there a benefit for preventive health check-ups?",
+            "How does the policy define a 'Hospital'?",
+            "What is the extent of coverage for AYUSH treatments?",
+            "Are there any sub-limits on room rent and ICU charges for Plan A?"
+        ];
+
+        // Load example questions on page load
+        window.onload = function() {
+            document.getElementById('questions').value = exampleQuestions.join('\n');
+        };
+
+        function addQuestion(question) {
+            const textarea = document.getElementById('questions');
+            const currentQuestions = textarea.value.trim();
+            
+            if (currentQuestions === '') {
+                textarea.value = question;
+            } else {
+                textarea.value = currentQuestions + '\n' + question;
+            }
+            
+            // Scroll to textarea
+            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            textarea.focus();
+        }
+
+        async function processQuery() {
+            const documentUrl = document.getElementById('documentUrl').value.trim();
+            const questionsText = document.getElementById('questions').value.trim();
+            
+            // Validation
+            if (!documentUrl) {
+                showError('Please enter a document URL');
+                return;
+            }
+            
+            if (!questionsText) {
+                showError('Please enter at least one question');
+                return;
+            }
+            
+            // Parse questions
+            const questions = questionsText
+                .split('\n')
+                .map(q => q.trim())
+                .filter(q => q.length > 0);
+            
+            if (questions.length === 0) {
+                showError('Please enter at least one valid question');
+                return;
+            }
+            
+            // Show loading state
+            showLoading(true);
+            hideError();
+            hideResults();
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch('http://localhost:8000/hackrx/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer 2bfa46dcffe69615807a8586036130853540f4c0682bcbbf5625c64a5f43e96f'
+                    },
+                    body: JSON.stringify({
+                        documents: documentUrl,
+                        questions: questions
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const processingTime = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                displayResults(questions, data.answers, processingTime);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Failed to process questions: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayResults(questions, answers, processingTime) {
+            const container = document.getElementById('answersContainer');
+            const stats = document.getElementById('stats');
+            
+            // Show processing stats
+            stats.innerHTML = `✅ Successfully processed ${questions.length} questions in ${processingTime} seconds`;
+            
+            // Clear previous results
+            container.innerHTML = '';
+            
+            // Create answer cards
+            questions.forEach((question, index) => {
+                const answer = answers[index] || 'No answer available';
+                
+                const card = document.createElement('div');
+                card.className = 'answer-card';
+                
+                card.innerHTML = `
+                    <div class="question">
+                        <strong>Q${index + 1}:</strong> ${question}
+                    </div>
+                    <div class="answer">
+                        ${formatAnswer(answer)}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Show results with animation
+            const results = document.getElementById('results');
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function formatAnswer(answer) {
+            // Basic formatting for better readability
+            return answer
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+                .replace(/\n/g, '<br>') // Line breaks
+                .replace(/(\d+\.\s)/g, '<br>$1') // Numbered lists
+                .replace(/(-\s)/g, '<br>• '); // Bullet points
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (show) {
+                loading.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>⏳</span> Processing...';
+            } else {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🔍</span> Process Questions';
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        // Allow Enter key to submit in document URL field
+        document.getElementById('documentUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processQuery();
+            }
+        });
+    </script>
+</body>
+</html>
